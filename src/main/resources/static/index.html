@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>API Watchdog Dashboard</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 2rem;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #555;
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        label {
+            font-weight: 600;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            max-width: 480px;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            margin-top: 0.25rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        button {
+            padding: 0.5rem 1.2rem;
+            border-radius: 4px;
+            border: none;
+            background: #2563eb;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .status.ok {
+            color: #15803d;
+        }
+
+        .status.error {
+            color: #b91c1c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+            background: #fff;
+        }
+
+        th, td {
+            padding: 0.4rem 0.6rem;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        th {
+            background: #f0f0f0;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.1rem 0.4rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .tag-up {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .tag-down {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .tag-unknown {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .error-text {
+            max-width: 380px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body>
+<h1>API Watchdog</h1>
+<div class="subtitle">Simple API health &amp; latency checker</div>
+
+<div class="card">
+    <h2>Run a new check</h2>
+    <label for="urlInput">API URL</label>
+    <input id="urlInput" type="text" placeholder="https://google.com" value="https://google.com"/>
+    <br/>
+    <button id="checkBtn">Check now</button>
+    <div id="checkStatus" class="status"></div>
+</div>
+
+<div class="card">
+    <h2>Last checks (history)</h2>
+    <button id="refreshBtn" style="margin-bottom: 0.5rem;">Refresh history</button>
+    <div id="historyStatus" class="status"></div>
+    <table id="historyTable" style="display:none;">
+        <thead>
+        <tr>
+            <th>URL</th>
+            <th>Status</th>
+            <th>Latency (ms)</th>
+            <th>Timestamp</th>
+            <th>Error</th>
+        </tr>
+        </thead>
+        <tbody id="historyBody">
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const checkBtn = document.getElementById('checkBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const urlInput = document.getElementById('urlInput');
+    const checkStatus = document.getElementById('checkStatus');
+    const historyStatus = document.getElementById('historyStatus');
+    const historyTable = document.getElementById('historyTable');
+    const historyBody = document.getElementById('historyBody');
+
+    function statusTag(status, error) {
+        if (error) {
+            return '<span class="tag tag-down">ERROR</span>';
+        }
+        if (status >= 200 && status < 400) {
+            return '<span class="tag tag-up">UP</span>';
+        }
+        if (status === 0) {
+            return '<span class="tag tag-unknown">UNKNOWN</span>';
+        }
+        return '<span class="tag tag-down">DOWN</span>';
+    }
+
+    async function runCheck() {
+        const url = urlInput.value.trim();
+        if (!url) {
+            checkStatus.textContent = 'Please enter a URL.';
+            checkStatus.className = 'status error';
+            return;
+        }
+
+        checkBtn.disabled = true;
+        checkStatus.textContent = 'Checking...';
+        checkStatus.className = 'status';
+
+        try {
+            const resp = await fetch('/api/check?url=' + encodeURIComponent(url));
+            if (!resp.ok) {
+                throw new Error('HTTP ' + resp.status);
+            }
+            const data = await resp.json();
+            checkStatus.innerHTML = `Status: ${data.status}, latency: ${data.responseTimeMs} ms`;
+            checkStatus.className = 'status ok';
+            await loadHistory();
+        } catch (e) {
+            checkStatus.textContent = 'Check failed: ' + e.message;
+            checkStatus.className = 'status error';
+        } finally {
+            checkBtn.disabled = false;
+        }
+    }
+
+    async function loadHistory() {
+        historyStatus.textContent = 'Loading history...';
+        historyStatus.className = 'status';
+
+        try {
+            const resp = await fetch('/api/history');
+            if (!resp.ok) {
+                throw new Error('HTTP ' + resp.status);
+            }
+            const list = await resp.json();
+
+            historyBody.innerHTML = '';
+            if (list.length === 0) {
+                historyTable.style.display = 'none';
+                historyStatus.textContent = 'No history yet. Run a few checks.';
+                historyStatus.className = 'status';
+                return;
+            }
+
+            list.forEach(item => {
+                const tr = document.createElement('tr');
+                const errorText = item.error || '';
+                tr.innerHTML = `
+                    <td>${item.url}</td>
+                    <td>${statusTag(item.status, item.error)}</td>
+                    <td>${item.responseTimeMs}</td>
+                    <td>${item.timestamp}</td>
+                    <td class="error-text" title="${errorText}">${errorText}</td>
+                `;
+                historyBody.appendChild(tr);
+            });
+
+            historyTable.style.display = 'table';
+            historyStatus.textContent = '';
+            historyStatus.className = 'status';
+        } catch (e) {
+            historyStatus.textContent = 'Failed to load history: ' + e.message;
+            historyStatus.className = 'status error';
+            historyTable.style.display = 'none';
+        }
+    }
+
+    checkBtn.addEventListener('click', runCheck);
+    refreshBtn.addEventListener('click', loadHistory);
+
+    // Auto-load history on page load
+    loadHistory();
+</script>
+</body>
+</html>
