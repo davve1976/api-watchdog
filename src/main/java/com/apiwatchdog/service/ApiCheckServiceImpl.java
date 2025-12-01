@@ -1,5 +1,6 @@
 package com.apiwatchdog.service;
 
+import com.apiwatchdog.alert.AlertService;
 import com.apiwatchdog.model.ApiResponse;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +17,15 @@ import java.util.List;
 public class ApiCheckServiceImpl implements ApiCheckService {
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final AlertService alertService;
 
     // In-memory history of last N checks
     private static final int MAX_HISTORY_SIZE = 10;
     private final Deque<ApiResponse> history = new LinkedList<>();
+
+    public ApiCheckServiceImpl(AlertService alertService) {
+        this.alertService = alertService;
+    }
 
     @Override
     public ApiResponse checkUrl(String url) {
@@ -50,6 +56,7 @@ public class ApiCheckServiceImpl implements ApiCheckService {
         );
 
         addToHistory(result);
+        alertService.notifyIfFailure(result);
         return result;
     }
 

@@ -43,6 +43,20 @@ GET http://localhost:8080/healthcheck?url=https://google.com
   "timestamp": "2025-11-30T21:10:00Z"
 }
 
+### Authentication
+
+For `/api/**` endpoints you must provide an API key header:
+
+`X-API-Key: <your-key>`
+
+Configured via:
+
+```properties
+apiwatchdog.api-key.enabled=true
+apiwatchdog.api-key.value=your-secret
+```
+
+
 ### Project Structure
 ```bash
 api-watchdog/
