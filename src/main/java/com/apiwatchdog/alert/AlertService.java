@@ -13,23 +13,36 @@ public class AlertService {
     private final MailSender mailSender;
     private final boolean mailEnabled;
     private final String mailTo;
+    private final SlackNotifier slackNotifier;
 
     public AlertService(
             @Nullable MailSender mailSender,
             @Value("${apiwatchdog.alerts.mail.enabled:false}") boolean mailEnabled,
-            @Value("${apiwatchdog.alerts.mail.to:}") String mailTo) {
+            @Value("${apiwatchdog.alerts.mail.to:}") String mailTo,
+            SlackNotifier slackNotifier) {
+
         this.mailSender = mailSender;
         this.mailEnabled = mailEnabled;
         this.mailTo = mailTo;
+        this.slackNotifier = slackNotifier;
     }
 
     public void notifyIfFailure(ApiResponse response) {
-        if (!mailEnabled || mailSender == null || mailTo == null || mailTo.isBlank()) {
+        // Inget alert om mail/slack ej konfigurerat
+        boolean failure = response.getError() != null || response.getStatus() >= 400;
+        if (!failure) {
             return;
         }
 
-        boolean failure = response.getError() != null || response.getStatus() >= 400;
-        if (!failure) {
+        // Mail (om aktiverat)
+        sendMailIfEnabled(response);
+
+        // Slack (om aktiverat)
+        slackNotifier.notifyFailure(response);
+    }
+
+    private void sendMailIfEnabled(ApiResponse response) {
+        if (!mailEnabled || mailSender == null || mailTo == null || mailTo.isBlank()) {
             return;
         }
 
@@ -41,7 +54,7 @@ public class AlertService {
         try {
             mailSender.send(msg);
         } catch (Exception ignored) {
-            // logga ev. senare
+            // här kan du logga senare om du vill
         }
     }
 

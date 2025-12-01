@@ -4,7 +4,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -13,19 +12,17 @@ import java.io.IOException;
 @Component
 public class ApiKeyFilter extends OncePerRequestFilter {
 
-    @Value("${apiwatchdog.api-key.enabled:true}")
-    private boolean apiKeyEnabled;
-
-    @Value("${apiwatchdog.api-key.value:}")
-    private String apiKeyValue;
+    private static final boolean API_KEY_ENABLED = true;
+    private static final String API_KEY_VALUE = "changeme";
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        // Swagger, root och ev. health kan vara öppet
-        return path.startsWith("/swagger-ui")
+        // Tillåt root + swagger + actuator helt öppet
+        return path.equals("/")
+                || path.startsWith("/swagger-ui")
                 || path.startsWith("/v3/api-docs")
-                || path.equals("/")
+                || path.startsWith("/actuator")
                 || !path.startsWith("/api/");
     }
 
@@ -35,17 +32,23 @@ public class ApiKeyFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        if (!apiKeyEnabled) {
+        if (!API_KEY_ENABLED) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String header = request.getHeader("X-API-Key");
-        if (apiKeyValue != null && apiKeyValue.equals(header)) {
+        String trimmed = header == null ? null : header.trim();
+
+        System.out.println("X-API-Key raw   = '" + header + "'");
+        System.out.println("X-API-Key trim  = '" + trimmed + "'");
+        System.out.println("Expected value  = '" + API_KEY_VALUE + "'");
+        System.out.println("Equals?         = " + API_KEY_VALUE.equals(trimmed));
+
+        if (API_KEY_VALUE.equals(trimmed)) {
             filterChain.doFilter(request, response);
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Invalid or missing API key");
         }
     }
 }

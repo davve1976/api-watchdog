@@ -2,7 +2,14 @@ package com.apiwatchdog.model;
 
 import java.time.LocalDateTime;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "api_checks")
 public class ApiResponse {
+
+    @Id
+    private String id;
 
     private String url;
     private int status;

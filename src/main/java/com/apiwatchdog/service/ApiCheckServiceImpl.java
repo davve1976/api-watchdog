@@ -2,6 +2,9 @@ package com.apiwatchdog.service;
 
 import com.apiwatchdog.alert.AlertService;
 import com.apiwatchdog.model.ApiResponse;
+import com.apiwatchdog.repository.ApiResponseRepository;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -18,13 +21,18 @@ public class ApiCheckServiceImpl implements ApiCheckService {
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final AlertService alertService;
+    private final ApiResponseRepository repository;
+    private final boolean mongoEnabled;
 
     // In-memory history of last N checks
     private static final int MAX_HISTORY_SIZE = 10;
     private final Deque<ApiResponse> history = new LinkedList<>();
 
-    public ApiCheckServiceImpl(AlertService alertService) {
+    public ApiCheckServiceImpl(AlertService alertService, ApiResponseRepository repository,
+            @Value("${apiwatchdog.history.mongodb.enabled:false}") boolean mongoEnabled) {
         this.alertService = alertService;
+        this.repository = repository;
+        this.mongoEnabled = mongoEnabled;
     }
 
     @Override
@@ -54,6 +62,14 @@ public class ApiCheckServiceImpl implements ApiCheckService {
                 LocalDateTime.now(),
                 error
         );
+
+        if (mongoEnabled && repository != null) {
+            try {
+                repository.save(result);
+            } catch (Exception ignored) {
+                // logga ev.
+            }
+        }
 
         addToHistory(result);
         alertService.notifyIfFailure(result);
