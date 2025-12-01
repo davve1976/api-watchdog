@@ -5,6 +5,7 @@ import com.apiwatchdog.service.ApiCheckService;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,8 +20,13 @@ public class HealthCheckController {
     }
 
     @GetMapping("/check")
-    public ResponseEntity<ApiResponse> check(@RequestParam("url") String url) {
-        return ResponseEntity.ok(apiCheckService.checkUrl(url));
+    public ResponseEntity<ApiResponse> check(@RequestParam("url") String url,
+    		@RequestHeader(value = "x-api-key", required = false) String apiKey) {
+
+    	if (!"my-secret-key".equals(apiKey)) {
+    		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    	}
+    	return ResponseEntity.ok(apiCheckService.checkUrl(url));
     }
 
     @GetMapping("/history")

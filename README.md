@@ -1,9 +1,13 @@
+
 # 🛡️ API Watchdog – Simple API Health & Latency Checker
 
-![Status](https://img.shields.io/badge/status-active-success)
+[🟢 Live Demo](https://api-watchdog-production.up.railway.app)
+
+![Status](https://img.shields.io/badge/deployed-success-brightgreen)
 ![Java](https://img.shields.io/badge/java-21-blue)
-![Spring Boot](https://img.shields.io/badge/spring--boot-3.0-green)
+![Spring Boot](https://img.shields.io/badge/spring--boot-3-green)
 ![Docker](https://img.shields.io/badge/docker-ready-informational)
+![Railway](https://img.shields.io/badge/railway-deployed-purple)
 
 API Watchdog is a lightweight Java / Spring Boot service that checks the **health and latency** of any HTTP/REST API.
 
@@ -13,54 +17,33 @@ You provide a URL – the service:
 - Captures **HTTP status code**  
 - Returns a **JSON payload** with timestamp and optional error message  
 
----
-
-## ✔️ **Perfect for**
+## ✔️ Perfect for
 - Quick checks of internal/external APIs  
 - Monitoring integration endpoints during development  
 - Simple health probes in dev/test environments  
 - Part of a CI/CD pipeline or Docker stack
 
----
+## 🚀 Getting Started
 
-## 🚀 **Getting Started**
-
-### 📦 Run Locally (Maven)
-```bash
+### Run Locally (Maven)
 mvn spring-boot:run
-```
 
-### 🐳 Run with Docker
-```bash
+### Run with Docker
 docker build -t api-watchdog .
 docker run -p 8080:8080 api-watchdog
-```
 
-### 🔍 API Usage
-```bash
-Health Check Endpoint
-GET http://localhost:8080/api/check?url=https://google.com
-```
+### API Usage
+GET http://localhost:8080/healthcheck?url=https://google.com
 
 ### Example Response
-```bash
 {
   "url": "https://google.com",
   "status": 200,
   "latencyMs": 112,
   "timestamp": "2025-11-30T21:10:00Z"
 }
-```
 
-### 🌐 Dashboard
-
-The application also serves a very simple HTML dashboard on:
-
-```text
-http://localhost:8080/
-```
-
-### 📁 Project Structure
+### Project Structure
 ```bash
 api-watchdog/
  ├─ src/main/java/com/apiwatchdog
@@ -72,32 +55,17 @@ api-watchdog/
  ├─ pom.xml
  └─ README.md
  ```
- 
-### 📌 Technologies
-```bash
-Tech	Used
-Java 21	✔️
-Spring Boot 3	✔️
-REST API	✔️
-Docker	✔️
-Maven	✔️
-```
 
-### 📄 License
-```bash
+### SaaS Plans (coming soon)
+Free – 10 checks/day  
+Pro – €5/mo, unlimited checks  
+Business – €15/mo, email alerts + Slack
+
+### License
 MIT – Free to use, improve, or build upon.
-```
 
-### 🤝 Contribute
-```bash
-Pull requests are welcome!
-Feel free to open an issue or suggest features.
-```
+### Contact
+Author: David Wilson Stenberg  
+GitHub: https://github.com/davve1976
 
-### ✉️ Contact
-```bash
-Author: David Wilson Stenberg
-Find me on GitHub: https://github.com/davve1976
-```
-
-### Made with ❤️ for developers who want quick API monitoring.
+Made with ❤️ for developers who want quick API monitoring.

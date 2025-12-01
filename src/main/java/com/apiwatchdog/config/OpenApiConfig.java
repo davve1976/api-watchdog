@@ -1,0 +1,19 @@
+package com.apiwatchdog.config;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class OpenApiConfig {
+
+	@Bean
+	public OpenAPI apiWatchdogOpenAPI() {
+		return new OpenAPI()
+				.info(new Info()
+						.title("API Watchdog")
+						.description("Simple API health & latency checker")
+						.version("v1"));
+	}
+}
