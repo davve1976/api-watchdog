@@ -48,7 +48,9 @@ public class ApiKeyFilter extends OncePerRequestFilter {
         if (API_KEY_VALUE.equals(trimmed)) {
             filterChain.doFilter(request, response);
         } else {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            // commit a 401 response immediately to avoid Spring Security adding Basic auth headers
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized - missing or invalid API key");
+            return;
         }
     }
 }
