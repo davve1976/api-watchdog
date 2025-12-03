@@ -13,24 +13,30 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 public class HealthCheckController {
 
-    private final ApiCheckService apiCheckService;
+	private final ApiCheckService apiCheckService;
 
-    public HealthCheckController(ApiCheckService apiCheckService) {
-        this.apiCheckService = apiCheckService;
-    }
+	public HealthCheckController(ApiCheckService apiCheckService) {
+		this.apiCheckService = apiCheckService;
+	}
 
-    @GetMapping("/check")
-    public ResponseEntity<ApiResponse> check(@RequestParam("url") String url,
-    		@RequestHeader(value = "x-api-key", required = false) String apiKey) {
+	//    @GetMapping("/check")
+	//    public ResponseEntity<ApiResponse> check(@RequestParam("url") String url,
+	//    		@RequestHeader(value = "x-api-key", required = false) String apiKey) {
+	//
+	//    	if (!"my-secret-key".equals(apiKey)) {
+	//    		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+	//    	}
+	//    	return ResponseEntity.ok(apiCheckService.checkUrl(url));
+	//    }
 
-    	if (!"my-secret-key".equals(apiKey)) {
-    		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    	}
-    	return ResponseEntity.ok(apiCheckService.checkUrl(url));
-    }
+	@GetMapping("/check")
+	public ResponseEntity<ApiResponse> check(@RequestParam("url") String url) {
+		ApiResponse result = apiCheckService.checkUrl(url);
+		return ResponseEntity.ok(result);
+	}
 
-    @GetMapping("/history")
-    public ResponseEntity<List<ApiResponse>> history() {
-        return ResponseEntity.ok(apiCheckService.getHistory());
-    }
+	@GetMapping("/history")
+	public ResponseEntity<List<ApiResponse>> history() {
+		return ResponseEntity.ok(apiCheckService.getHistory());
+	}
 }
