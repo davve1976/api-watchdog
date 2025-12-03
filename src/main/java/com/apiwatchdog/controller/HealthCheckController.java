@@ -39,4 +39,10 @@ public class HealthCheckController {
 	public ResponseEntity<List<ApiResponse>> history() {
 		return ResponseEntity.ok(apiCheckService.getHistory());
 	}
+
+	@GetMapping("/history/db")
+	public ResponseEntity<List<ApiResponse>> dbHistory() {
+	    return ResponseEntity.ok(apiCheckService.getDbHistory());
+	}
+
 }
