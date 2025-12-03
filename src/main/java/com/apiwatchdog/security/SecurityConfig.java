@@ -10,19 +10,13 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
-		// inga CSRF-kontroller
-		.csrf(csrf -> csrf.disable())
-		// ALLA requests är tillåtna
-		.authorizeHttpRequests(auth -> auth
-				.anyRequest().permitAll()
-				)
-		// stäng av basic auth och login-sida
-		.httpBasic(httpBasic -> httpBasic.disable())
-		.formLogin(form -> form.disable());
-
-		return http.build();
-	}
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+            .httpBasic(httpBasic -> httpBasic.disable())
+            .formLogin(form -> form.disable());
+        return http.build();
+    }
 }

@@ -35,6 +35,12 @@ public class HealthCheckController {
 		return ResponseEntity.ok(result);
 	}
 
+	@GetMapping("/public/check")
+	public ResponseEntity<ApiResponse> publicCheck(@RequestParam("url") String url) {
+	    ApiResponse result = apiCheckService.checkUrl(url);
+	    return ResponseEntity.ok(result);
+	}
+
 	@GetMapping("/history")
 	public ResponseEntity<List<ApiResponse>> history() {
 		return ResponseEntity.ok(apiCheckService.getHistory());
