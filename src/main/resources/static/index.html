@@ -191,7 +191,7 @@
         checkStatus.className = 'status';
 
         try {
-            const resp = await fetch('/api/check?url=' + encodeURIComponent(url));
+            const resp = await fetch('/api//public/check?url=' + encodeURIComponent(url));
             if (!resp.ok) {
                 throw new Error('HTTP ' + resp.status);
             }
