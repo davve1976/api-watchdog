@@ -7,6 +7,6 @@ RUN mvn -q -DskipTests clean package
 # Stage 2: Run
 FROM eclipse-temurin:22-jre
 WORKDIR /app
-COPY --from=builder /app/target/digg.jar digg.jar
+COPY --from=builder /app/target/api-watchdog.jar api-watchdog.jar
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","digg.jar"]
