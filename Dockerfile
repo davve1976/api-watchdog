@@ -9,4 +9,4 @@ FROM eclipse-temurin:22-jre
 WORKDIR /app
 COPY --from=builder /app/target/api-watchdog.jar api-watchdog.jar
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","digg.jar"]
+ENTRYPOINT ["java","-jar","api-watchdog.jar"]
