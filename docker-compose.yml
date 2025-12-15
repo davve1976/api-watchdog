@@ -20,7 +20,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile        # frontend
       args:
-        VITE_API_URL: http://api-backend:8080   # <-- FIX HÄR!
+        VITE_API_URL: http://api:8080
     image: api-watchdog-frontend:latest
     depends_on:
       api:
