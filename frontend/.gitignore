@@ -1,0 +1,16 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+dist/
+.cache/
+.temp/
+
+# Editor
+.vscode/
+.idea/
+
+# Mac/Windows skräp
+.DS_Store
+Thumbs.db
