@@ -1,6 +1,6 @@
 // Always call backend through the same server the frontend is served from
 // Reverse proxy in NGINX or Railway handles /api → backend
-const API_BASE = import.meta.env.VITE_API_URL; // så det matchar docker-compose
+const API_BASE = "/api";
 
 const API_KEY = import.meta.env.VITE_API_KEY || "changeme123";  // fallback for local dev
 
