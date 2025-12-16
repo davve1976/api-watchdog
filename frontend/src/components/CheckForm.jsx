@@ -1,34 +1,17 @@
 import { useState } from "react";
-import { api } from "../api";
 
-export default function CheckForm({ onChecked }) {
-  const [url, setUrl] = useState("");
-  const [result, setResult] = useState(null);
+export default function CheckForm({ onCheck }) {
+    const [url, setUrl] = useState("");
 
-  const runCheck = async () => {
-    if (!url) return;
-    const res = await api.get("/api/check?url=" + url);
-    setResult(res.data);
-    onChecked();
-  };
-
-  return (
-    <div className="card">
-      <h2>Run a new check</h2>
-
-      <input
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        placeholder="https://example.com"
-      />
-
-      <button onClick={runCheck}>Check now</button>
-
-      {result && (
-        <div className="result">
-          Status: {result.status} — Time: {result.responseTimeMs} ms
+    return (
+        <div className="check-form">
+            <input
+                type="text"
+                placeholder="Enter URL to check"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+            />
+            <button onClick={() => onCheck(url)}>Run Check</button>
         </div>
-      )}
-    </div>
-  );
+    );
 }
