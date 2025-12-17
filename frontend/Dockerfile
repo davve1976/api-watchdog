@@ -17,4 +17,4 @@ COPY --from=build /app/dist .
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 
 # Replace env variable and start nginx
-#CMD ["/bin/sh", "-c", "envsubst '$API_URL' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"]
+CMD ["/bin/sh", "-c", "envsubst '${API_URL}' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"]
