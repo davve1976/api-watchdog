@@ -3,7 +3,7 @@ services:
     build: .
     # Tell compose specifically which file to read for this service
     env_file:
-      - .env.production 
+      - .env.production
     ports:
       - "8080:80"
     environment:
