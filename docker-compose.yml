@@ -1,29 +1,12 @@
-version: "3.9"
+version: '3.9'
 
 services:
-  api:
+  frontend:
     build:
       context: .
-      dockerfile: Dockerfile        # backend
-    image: api-watchdog-backend:latest
-    container_name: api-backend
-    ports:
-      - "8080:8080"
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
-      interval: 10s
-      timeout: 3s
-      retries: 10
-
-  web:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile        # frontend
       args:
-        VITE_API_URL: https://api-watchdog.up.railway.app
-    image: api-watchdog-frontend:latest
-    depends_on:
-      api:
-        condition: service_healthy
+        API_URL: https://api-watchdog.up.railway.app
     ports:
-      - "8081:80"
+      - "8080:80"
+    environment:
+      API_URL: https://api-watchdog.up.railway.app
