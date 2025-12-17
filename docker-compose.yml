@@ -1,12 +1,9 @@
 version: "3.9"
 services:
   frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        API_URL: ${API_URL}
+    build: .
     ports:
       - "8080:80"
     environment:
-      - API_URL=${API_URL}
+      # This is the variable NGINX will look for at startup
+      - API_URL=${API_URL} 
