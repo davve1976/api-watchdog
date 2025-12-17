@@ -16,10 +16,8 @@ RUN npm run build
 FROM nginx:alpine
 WORKDIR /usr/share/nginx/html
 
-# Kopiera frontend-dist
 COPY --from=build /app/dist .
 
-# Kopiera och substituera Nginx template -> default.conf
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 RUN apk add --no-cache gettext
 CMD ["/bin/sh", "-c", "envsubst < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"]
