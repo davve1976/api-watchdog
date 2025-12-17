@@ -1,12 +1,12 @@
-version: '3.9'
-
+version: "3.9"
 services:
   frontend:
     build:
       context: .
+      dockerfile: Dockerfile
       args:
-        API_URL: https://api-watchdog.up.railway.app
+        API_URL: ${API_URL}
     ports:
       - "8080:80"
     environment:
-      API_URL: https://api-watchdog.up.railway.app
+      API_URL: ${API_URL}
