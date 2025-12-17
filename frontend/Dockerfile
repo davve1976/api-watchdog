@@ -18,6 +18,6 @@ WORKDIR /usr/share/nginx/html
 
 COPY --from=build /app/dist .
 
-COPY nginx.conf /etc/nginx/templates/default.conf
+COPY nginx.conf /etc/nginx/default.conf
 RUN apk add --no-cache gettext
 CMD ["/bin/sh", "-c", "envsubst < /etc/nginx/default.conf > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"]
