@@ -23,7 +23,7 @@ public class HealthCheckController {
 	public ResponseEntity<ApiResponse> check(@RequestParam("url") String url,
 			@RequestHeader(value = "x-api-key", required = false) String apiKey) {
 
-		if (!"my-secret-key".equals(apiKey)) {
+		if (!"changeme123".equals(apiKey)) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 		return ResponseEntity.ok(apiCheckService.checkUrl(url));
