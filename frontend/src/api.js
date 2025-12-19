@@ -5,7 +5,7 @@ const API_BASE = "/api";
 const API_KEY = import.meta.env.VITE_API_KEY || "changeme123";  // fallback for local dev
 
 export async function apiCheck(url) {
-    const response = await fetch(`${API_BASE}/check?url=${encodeURIComponent(url)}`, {
+    const response = await fetch(`${API_BASE}/public/check?url=${encodeURIComponent(url)}`, {
         headers: {
             "X-API-Key": API_KEY,
         },
