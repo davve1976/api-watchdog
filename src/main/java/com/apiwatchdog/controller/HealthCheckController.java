@@ -19,21 +19,21 @@ public class HealthCheckController {
 		this.apiCheckService = apiCheckService;
 	}
 
-	//    @GetMapping("/check")
-	//    public ResponseEntity<ApiResponse> check(@RequestParam("url") String url,
-	//    		@RequestHeader(value = "x-api-key", required = false) String apiKey) {
-	//
-	//    	if (!"my-secret-key".equals(apiKey)) {
-	//    		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-	//    	}
-	//    	return ResponseEntity.ok(apiCheckService.checkUrl(url));
-	//    }
-
 	@GetMapping("/check")
-	public ResponseEntity<ApiResponse> check(@RequestParam("url") String url) {
-		ApiResponse result = apiCheckService.checkUrl(url);
-		return ResponseEntity.ok(result);
+	public ResponseEntity<ApiResponse> check(@RequestParam("url") String url,
+			@RequestHeader(value = "x-api-key", required = false) String apiKey) {
+
+		if (!"my-secret-key".equals(apiKey)) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+		return ResponseEntity.ok(apiCheckService.checkUrl(url));
 	}
+
+//	@GetMapping("/check")
+//	public ResponseEntity<ApiResponse> check(@RequestParam("url") String url) {
+//		ApiResponse result = apiCheckService.checkUrl(url);
+//		return ResponseEntity.ok(result);
+//	}
 
 	@GetMapping("/public/check")
 	public ResponseEntity<ApiResponse> publicCheck(@RequestParam("url") String url) {
