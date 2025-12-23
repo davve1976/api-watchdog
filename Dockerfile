@@ -1,12 +1,18 @@
-# Stage 1: Build
-FROM maven:3.9.6-eclipse-temurin-22 AS builder
+FROM eclipse-temurin:22-jdk AS build
+
 WORKDIR /app
 COPY . .
-RUN mvn -q -DskipTests clean package
 
-# Stage 2: Run
+# ✅ Installera Maven i containern
+RUN apt-get update && apt-get install -y maven
+
+# ✅ Bygg projektet med din pom.xml
+RUN mvn -q -DskipTests package
+
+# Runtime image
 FROM eclipse-temurin:22-jre
 WORKDIR /app
-COPY --from=builder /app/target/api-watchdog.jar api-watchdog.jar
-EXPOSE 8080
-ENTRYPOINT ["java","-jar","api-watchdog.jar"]
+
+COPY --from=build /app/target/api-watchdog.jar ./api-watchdog.jar
+
+CMD ["java", "-jar", "api-watchdog.jar"]

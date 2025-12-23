@@ -1,10 +1,38 @@
 services:
-  frontend:
-    build: .
-    # Tell compose specifically which file to read for this service
-    env_file:
-      - .env.production
+  backend:
+    build:
+      context: .
+    container_name: api-backend
     ports:
-      - "8080:80"
+      - "8080:8080"
     environment:
-      - API_URL=${API_URL}
+      SPRING_PROFILES_ACTIVE: local
+      MONGODB_URI: ${MONGODB_URI:-}
+    depends_on:
+      - mongo
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:80"
+    environment:
+      # When running via docker-compose the frontend should reach the backend via the service name
+      API_URL: http://api-backend:8080
+    depends_on:
+      - backend
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:

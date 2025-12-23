@@ -16,8 +16,22 @@ public class ApiKeyFilter extends OncePerRequestFilter {
     @Value("${apiwatchdog.api-key.enabled:true}")
     private boolean apiKeyEnabled;
 
-    @Value("${apiwatchdog.api-key.value:changeme}")
-    private String apiKeyValue;
+    // Support both property names for backwards compatibility
+    @Value("${apiwatchdog.api-key.value:}")
+    private String apiKeyValuePrimary;
+
+    @Value("${apiwatchdog.security.api-key:}")
+    private String apiKeyValueLegacy;
+
+    private String getEffectiveApiKey() {
+        if (apiKeyValuePrimary != null && !apiKeyValuePrimary.isBlank()) {
+            return apiKeyValuePrimary.trim();
+        }
+        if (apiKeyValueLegacy != null && !apiKeyValueLegacy.isBlank()) {
+            return apiKeyValueLegacy.trim();
+        }
+        return null;
+    }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -48,10 +62,14 @@ public class ApiKeyFilter extends OncePerRequestFilter {
             return;
         }
 
+        // accept common header casings
         String header = request.getHeader("X-API-Key");
+        if (header == null) header = request.getHeader("X-API-KEY");
+        if (header == null) header = request.getHeader("x-api-key");
         String trimmed = header == null ? null : header.trim();
 
-        if (apiKeyValue != null && apiKeyValue.equals(trimmed)) {
+        String effective = getEffectiveApiKey();
+        if (effective != null && effective.equals(trimmed)) {
             // Rätt nyckel → vidare till controller
             filterChain.doFilter(request, response);
         } else {

@@ -4,7 +4,6 @@ import com.apiwatchdog.alert.AlertService;
 import com.apiwatchdog.model.ApiResponse;
 import com.apiwatchdog.repository.ApiResponseRepository;
 
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,83 +20,83 @@ import java.util.List;
 @Service
 public class ApiCheckServiceImpl implements ApiCheckService {
 
-    private final HttpClient httpClient = HttpClient.newHttpClient();
-    private final AlertService alertService;
-    private final ApiResponseRepository repository; // may be null when mongo disabled
-    private final boolean mongoEnabled;
+	private final HttpClient httpClient = HttpClient.newHttpClient();
+	private final AlertService alertService;
+	private ApiResponseRepository repository;
+	private boolean mongoEnabled;
 
-    // In-memory history of last N checks
-    private static final int MAX_HISTORY_SIZE = 10;
-    private final Deque<ApiResponse> history = new LinkedList<>();
-    
-    public ApiCheckServiceImpl(
-            AlertService alertService,
-            @Autowired(required = false) ApiResponseRepository repository,
-            @Value("${apiwatchdog.history.mongodb.enabled:false}") boolean mongoEnabled
-    ) {
+	// In-memory history of last N checks
+	private static final int MAX_HISTORY_SIZE = 10;
+	private final Deque<ApiResponse> history = new LinkedList<>();
+
+    public ApiCheckServiceImpl(AlertService alertService, @Value("${apiwatchdog.history.mongodb.enabled:false}") boolean mongoEnabled) {
         this.alertService = alertService;
-        this.repository = repository;
-        this.mongoEnabled = mongoEnabled && repository != null;
+        this.mongoEnabled = mongoEnabled;
     }
 
-    @Override
-    public ApiResponse checkUrl(String url) {
-        long start = System.currentTimeMillis();
-        int statusCode = 0;
-        String error = null;
-
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .GET()
-                    .build();
-
-            HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-            statusCode = response.statusCode();
-        } catch (Exception e) {
-            error = e.getClass().getSimpleName() + ": " + e.getMessage();
-        }
-
-        long end = System.currentTimeMillis();
-
-        ApiResponse result = new ApiResponse(
-                url,
-                statusCode,
-                end - start,
-                LocalDateTime.now(),
-                error
-                );
-
-        if (mongoEnabled && repository != null) {
-            try {
-                repository.save(result);
-            } catch (Exception ignored) {
-                // logga ev.
-            }
-        }
-
-        addToHistory(result);
-        alertService.notifyIfFailure(result);
-        return result;
+    @Autowired(required = false)
+    public void setRepository(ApiResponseRepository repo) {
+        this.repository = repo;
     }
 
-    private synchronized void addToHistory(ApiResponse response) {
-        history.addFirst(response);
-        while (history.size() > MAX_HISTORY_SIZE) {
-            history.removeLast();
-        }
-    }
+	@Override
+	public ApiResponse checkUrl(String url) {
+		long start = System.currentTimeMillis();
+		int statusCode = 0;
+		String error = null;
 
-    @Override
-    public synchronized List<ApiResponse> getHistory() {
-        return List.copyOf(history);
-    }
+		try {
+			HttpRequest request = HttpRequest.newBuilder()
+					.uri(URI.create(url))
+					.GET()
+					.build();
 
-    @Override
-    public List<ApiResponse> getDbHistory() {
-        if (!mongoEnabled || repository == null) {
-            return List.of(); // eller kasta exception, men empty är snällare
-        }
-        return repository.findAll(); // ev. page/limit senare
-    }
+			HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+			statusCode = response.statusCode();
+		} catch (Exception e) {
+			error = e.getClass().getSimpleName() + ": " + e.getMessage();
+		}
+
+		long end = System.currentTimeMillis();
+
+		ApiResponse result = new ApiResponse(
+				url,
+				statusCode,
+				end - start,
+				LocalDateTime.now(),
+				error
+				);
+
+		if (mongoEnabled && repository != null) {
+			try {
+				repository.save(result);
+			} catch (Exception ignored) {
+				// logga ev.
+			}
+		}
+
+		addToHistory(result);
+		alertService.notifyIfFailure(result);
+		return result;
+	}
+
+	private synchronized void addToHistory(ApiResponse response) {
+		history.addFirst(response);
+		while (history.size() > MAX_HISTORY_SIZE) {
+			history.removeLast();
+		}
+	}
+
+	@Override
+	public synchronized List<ApiResponse> getHistory() {
+		return List.copyOf(history);
+	}
+
+	@Override
+	public List<ApiResponse> getDbHistory() {
+		if (!mongoEnabled || repository == null) {
+			return List.of(); // eller kasta exception, men empty är snällare
+		}
+		return repository.findAll(); // ev. page/limit senare
+	}
 }
