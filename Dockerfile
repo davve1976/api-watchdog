@@ -3,8 +3,11 @@ FROM eclipse-temurin:22-jdk AS build
 WORKDIR /app
 COPY . .
 
-# Build the project with Maven (skip tests for faster image builds)
-RUN mvn -B -DskipTests package
+# ✅ Installera Maven i containern
+RUN apt-get update && apt-get install -y maven
+
+# ✅ Bygg projektet med din pom.xml
+RUN mvn -q -DskipTests package
 
 # Runtime image
 FROM eclipse-temurin:22-jre
