@@ -1,23 +1,22 @@
-FROM eclipse-temurin:22-jdk AS build
-
+# Build stage
+FROM maven:3.9.9-eclipse-temurin-22 AS build
 WORKDIR /app
+
+COPY pom.xml .
+RUN mvn -B -q -DskipTests dependency:go-offline
+
 COPY . .
+RUN mvn -B -q -DskipTests package
 
-# ✅ Installera Maven i containern
-RUN apt-get update && apt-get install -y maven
-
-# ✅ Bygg projektet med din pom.xml
-RUN mvn -q -DskipTests package
-
-# Runtime image
+# Runtime stage
 FROM eclipse-temurin:22-jre
 WORKDIR /app
 
-COPY --from=build /app/target/api-watchdog.jar ./api-watchdog.jar
+COPY --from=build /app/target/api-watchdog.jar app.jar
 
-# Expose the default port (can be overridden by PORT env var in production)
 EXPOSE 8080
 
-# Use a shell command so we can forward env vars into Java system properties.
-# This ensures the app listens on the PORT provided by hosting platforms (e.g. Railway)
-CMD ["sh", "-c", "java -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-production} -Dserver.port=${PORT:-8080} -jar api-watchdog.jar"]
+CMD ["sh", "-c", "java \
+  -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-production} \
+  -Dserver.port=${PORT:-8080} \
+  -jar app.jar"]
