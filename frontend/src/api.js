@@ -2,7 +2,7 @@
 // Reverse proxy in NGINX or Railway handles /api → backend
 const API_BASE = "/api";
 
-const API_KEY = import.meta.env.VITE_API_KEY || "changeme123";  // fallback for local dev
+const API_KEY = "changeme123";
 
 export async function apiCheck(url) {
     const response = await fetch(`${API_BASE}/public/check?url=${encodeURIComponent(url)}`, {
