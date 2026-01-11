@@ -13,11 +13,13 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")
+
+                registry.addMapping("/**")   // Viktigt! Alla endpoints
                         .allowedOrigins("https://api-watchdog-frontend.up.railway.app")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("Content-Type", "X-API-Key")
-                        .allowCredentials(true);
+                        .allowedHeaders("*")   // Låt browsern skicka allt
+                        .exposedHeaders("*")
+                        .allowCredentials(false);  // Sätt false eftersom du inte använder cookies
             }
         };
     }
