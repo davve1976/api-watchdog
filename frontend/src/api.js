@@ -1,6 +1,6 @@
 // Always call backend through the same server the frontend is served from
 // Reverse proxy in NGINX or Railway handles /api → backend
-const API_BASE = import.meta.env.VITE_API_BACKEND_URL; // || "http://localhost:8080/api";
+const API_BASE = import.meta.env.VITE_API_BACKEND_URL || "http://localhost:8080/api";
 
 const API_KEY = "changeme123";
 
