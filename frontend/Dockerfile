@@ -1,15 +1,18 @@
+# Step 1: Build the frontend
 FROM node:20 AS build
+
 WORKDIR /app
-
-COPY package*.json .
-RUN npm install
-
 COPY . .
-RUN npm run build
+RUN npm install && npm run build
 
+# Step 2: NGINX serve
 FROM nginx:stable-alpine
 
-COPY nginx/templates/default.conf.template /etc/nginx/templates/default.conf.template
+# Copy built frontend
 COPY --from=build /app/dist /usr/share/nginx/html
 
-CMD ["sh", "-c", "envsubst < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
+# Copy the NGINX template
+COPY nginx/templates/default.conf.template /etc/nginx/templates/default.conf.template
+
+# Railway will substitute env vars into the template and start nginx
+CMD ["nginx", "-g", "daemon off;"]
