@@ -2,6 +2,9 @@
 // Reverse proxy in NGINX or Railway handles /api → backend
 const API_BASE = import.meta.env.VITE_API_BACKEND_URL || "http://localhost:8080/api";
 
+// Debugging: Log the API base URL to verify the environment variable is loaded
+console.log("API_BASE:", API_BASE);
+
 const API_KEY = "changeme123";
 
 export async function apiCheck(url) {
