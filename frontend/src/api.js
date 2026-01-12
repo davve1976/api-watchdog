@@ -4,13 +4,16 @@ const API_BASE_URL = import.meta.env.VITE_API_BACKEND_URL || "http://localhost:8
 
 const API_BASE = API_BASE_URL + "/api";
 
-// Debugging: Log the API base URL to verify the environment variable is loaded
-console.log("API_BASE:", API_BASE);
-
 const API_KEY = "changeme123";
 
 export async function apiCheck(url) {
-    const response = await fetch(`${API_BASE}/public/check?url=${encodeURIComponent(url)}`, {
+	let fixedUrl = url.trim();
+
+	if (!fixedUrl.startsWith("http://") && !fixedUrl.startsWith("https://")) {
+	  fixedUrl = "https://" + fixedUrl;
+	}
+
+    const response = await fetch(`${API_BASE}/public/check?url=${encodeURIComponent(fixedUrl)}`, {
         headers: {
             "X-API-Key": API_KEY,
         },

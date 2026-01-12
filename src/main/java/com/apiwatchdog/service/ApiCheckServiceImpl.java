@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -44,6 +45,10 @@ public class ApiCheckServiceImpl implements ApiCheckService {
 		long start = System.currentTimeMillis();
 		int statusCode = 0;
 		String error = null;
+		
+		if (url != null && !url.startsWith("http://") && !url.startsWith("https://")) {
+			url = "https://" + url;
+		}
 
 		try {
 			HttpRequest request = HttpRequest.newBuilder()
@@ -53,7 +58,10 @@ public class ApiCheckServiceImpl implements ApiCheckService {
 
 			HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
 			statusCode = response.statusCode();
-		} catch (Exception e) {
+		} catch (InterruptedException e) {
+			error = e.getClass().getSimpleName() + ": " + e.getMessage();
+		    Thread.currentThread().interrupt();
+		} catch (IOException e) {
 			error = e.getClass().getSimpleName() + ": " + e.getMessage();
 		}
 
