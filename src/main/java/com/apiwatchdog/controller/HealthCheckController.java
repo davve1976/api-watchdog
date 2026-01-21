@@ -21,23 +21,16 @@ public class HealthCheckController {
 	@Value("${apiwatchdog.api-key.enabled:false}")
 	private boolean apiKeyEnabled;
 
-	// support both property names
 	@Value("${apiwatchdog.api-key.value:}")
 	private String apiKeyValuePrimary;
 
-	@Value("${apiwatchdog.security.api-key:}")
-	private String apiKeyValueLegacy;
-
-	public HealthCheckController(ApiCheckService apiCheckService) {
-		this.apiCheckService = apiCheckService;
-	}
+    public HealthCheckController(ApiCheckService apiCheckService) {
+        this.apiCheckService = apiCheckService;
+    }
 
 	private String getEffectiveApiKey() {
 		if (apiKeyValuePrimary != null && !apiKeyValuePrimary.isBlank()) {
 			return apiKeyValuePrimary.trim();
-		}
-		if (apiKeyValueLegacy != null && !apiKeyValueLegacy.isBlank()) {
-			return apiKeyValueLegacy.trim();
 		}
 		return null;
 	}

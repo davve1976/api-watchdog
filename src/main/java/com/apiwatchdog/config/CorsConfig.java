@@ -15,7 +15,12 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
 
                 registry.addMapping("/**")
-                        .allowedOrigins("https://api-watchdog-frontend.up.railway.app")
+                        .allowedOrigins(
+                            "https://api-watchdog-frontend.up.railway.app",
+                            "http://localhost:3000",
+                            "http://localhost",
+                            "http://127.0.0.1"
+                        )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .exposedHeaders("*")

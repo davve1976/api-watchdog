@@ -20,15 +20,9 @@ public class ApiKeyFilter extends OncePerRequestFilter {
     @Value("${apiwatchdog.api-key.value:}")
     private String apiKeyValuePrimary;
 
-    @Value("${apiwatchdog.security.api-key:}")
-    private String apiKeyValueLegacy;
-
     private String getEffectiveApiKey() {
         if (apiKeyValuePrimary != null && !apiKeyValuePrimary.isBlank()) {
             return apiKeyValuePrimary.trim();
-        }
-        if (apiKeyValueLegacy != null && !apiKeyValueLegacy.isBlank()) {
-            return apiKeyValueLegacy.trim();
         }
         return null;
     }
@@ -37,18 +31,13 @@ public class ApiKeyFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
 
-        // Tillåt root, swagger, actuator och "public" API öppet
-        if (path.equals("/")
-                || path.startsWith("/swagger-ui")
-                || path.startsWith("/v3/api-docs")
-                || path.startsWith("/actuator")
-                || path.startsWith("/api/history/")
-                || path.startsWith("/api/public/")) {
-            return true;
+        // Endast /api/check är skyddat av API-nyckel
+        if (path.startsWith("/api/check")) {
+            return false;
         }
 
-        // Filtrera bara /api/**, resten (t.ex. static) släpps
-        return !path.startsWith("/api/");
+        // Tillåt övriga API:er
+        return true;
     }
 
     @Override

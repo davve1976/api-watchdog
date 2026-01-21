@@ -21,11 +21,10 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_BACKEND_URL: http://localhost:8080/api
     ports:
       - "3000:80"
-    environment:
-      # When running via docker-compose the frontend should reach the backend via the service name
-      API_URL: http://api-backend:8080
     depends_on:
       - backend
 
